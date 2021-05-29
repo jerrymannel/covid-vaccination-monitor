@@ -8,10 +8,10 @@ Check for vaccine availability and notify via Telegram and Slack
 Data fetched at 5/29/2021, 10:00:10 PM
 ================================
 Bangalore Rural
-29-5-2021 : No slots
+Week of 29-5-2021 : No slots
 --------------------------------
 Bangalore Urban
-29-5-2021 : AVAILABLE
+Week of 29-5-2021 : AVAILABLE
 29-05-2021 18 [ 0/D1 048/D2 ] COVIS 560099 Narayana Hrudayalaya Pvt Ltd
 29-05-2021 18 [ 0/D1 100/D2 ] COVIS 560100 SYNGENE INTERNATIONAL LIMITED
 --------------------------------
