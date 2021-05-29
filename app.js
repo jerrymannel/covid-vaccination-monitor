@@ -169,7 +169,7 @@ async function processData(_rawdata, age){
 		rawDataFromFile.week.forEach(week => {
 			let processedData = processCenterData(week[1].centers, age)
 			if(processedData.indexOf("No") == 0 ) message += `*${week[0]}* : ${processedData}`
-			else message += `*${week[0]} : AVAILABLE *\n${processedData}`
+			else message += `Week of *${week[0]} : AVAILABLE *\n${processedData}`
 		})
 		message += "\n--------------------------------\n"
 	}
