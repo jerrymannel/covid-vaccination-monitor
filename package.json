@@ -1,5 +1,5 @@
 {
-  "name": "cowin",
+  "name": "covid-vaccination-monitor",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -8,7 +8,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@slack/web-api": "^6.2.3",
     "axios": "^0.21.1",
