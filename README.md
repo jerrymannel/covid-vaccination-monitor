@@ -55,7 +55,7 @@ Once you have created a bot save the token as `TELEGRAM_TOKEN`
 
 The API is `https://cdn-api.co-vin.in/api/v2/appointment/sessions/public/calendarByDistrict`. This takes two params
 
-* *date*: The today's date in dd-mm-yyyy format 
+* *date*: Today's date in dd-mm-yyyy format 
 * *district_id*: The district for which you are searching. This is a number
 
 Take a note of the district id and name.
