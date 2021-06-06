@@ -20,25 +20,25 @@ if(!fs.existsSync(RAWDATA_KA)) fs.writeFileSync(RAWDATA_KA, "")
 
 const kerala_districts = [
 	[301, "Alappuzha"],
-	[307, "Ernakulam"],
+	// [307, "Ernakulam"],
 	// [306, "Idukki"],
 	// [297, "Kannur"],
 	// [295, "Kasaragod"],
-	[298, "Kollam"],
-	[304, "Kottayam"],
+	// [298, "Kollam"],
+	// [304, "Kottayam"],
 	// [305, "Kozhikode"],
 	// [302, "Malappuram"],
 	// [308, "Palakkad"],
-	[300, "Pathanamthitta"],
-	[296, "Thiruvananthapuram"],
+	// [300, "Pathanamthitta"],
+	// [296, "Thiruvananthapuram"],
 	// [303, "Thrissur"],
 	// [299, "Wayanad"]
 ]
 
 const karnataka_districts = [
-	[276, "Bangalore Rural"],
-	[265, "Bangalore Urban"],
-	[294, "BBMP"],
+	// [276, "Bangalore Rural"],
+	// [265, "Bangalore Urban"],
+	// [294, "BBMP"],
 ]
 
 const URLS = {
