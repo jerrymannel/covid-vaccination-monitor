@@ -12,34 +12,10 @@ const conversationId = process.env.SLACK_CONVERSATION_ID
 const bot_id = process.env.SLACK_BOTID
 const web = new WebClient(token);
 
-const RAWDATA_KERALA = path.join(__dirname, "RAWDATA_KERALA")
-if(!fs.existsSync(RAWDATA_KERALA)) fs.writeFileSync(RAWDATA_KERALA, "")
+const RAWDATA = path.join(__dirname, "RAWDATA")
+if(!fs.existsSync(RAWDATA)) fs.writeFileSync(RAWDATA, "")
 
-const RAWDATA_KA = path.join(process.env.PWD, "RAWDATA_KA")
-if(!fs.existsSync(RAWDATA_KA)) fs.writeFileSync(RAWDATA_KA, "")
-
-const kerala_districts = [
-	[301, "Alappuzha"],
-	// [307, "Ernakulam"],
-	// [306, "Idukki"],
-	// [297, "Kannur"],
-	// [295, "Kasaragod"],
-	// [298, "Kollam"],
-	// [304, "Kottayam"],
-	// [305, "Kozhikode"],
-	// [302, "Malappuram"],
-	// [308, "Palakkad"],
-	// [300, "Pathanamthitta"],
-	// [296, "Thiruvananthapuram"],
-	// [303, "Thrissur"],
-	// [299, "Wayanad"]
-]
-
-const karnataka_districts = [
-	// [276, "Bangalore Rural"],
-	// [265, "Bangalore Urban"],
-	// [294, "BBMP"],
-]
+const monitoringList = require('./monitorList.js')
 
 const URLS = {
 	states: "https://cdn-api.co-vin.in/api/v2/admin/location/states",
@@ -69,7 +45,7 @@ async function telegramAPI(_message) {
 		url: `https://api.telegram.org/bot${telegramToken}/sendMessage`,
 		method: "POST",
 		data: {
-			"chat_id": "-595428516",
+			"chat_id": process.env.TELEGRAM_CHANNELID,
 			"text": _message,
 			"parse_mode": "Markdown"
 		},
@@ -155,57 +131,46 @@ function processCenterData(centerData, age){
 	return "No slots"
 }
 
-async function processData(_rawdata, age){
-	let reader = readline.createInterface({
-		input: fs.createReadStream(_rawdata),
-		crlfDelay: Infinity
-	})
+async function processData(apiReponse, district, week){
 	let message = "================================\n"
 	message += `Data fetched at ${new Date().toLocaleString()}\n`
 	message += "================================\n"
-	for await (const line of reader) {
-		rawDataFromFile = JSON.parse(line)
-		message += `*${rawDataFromFile.district}*\n`
-		rawDataFromFile.week.forEach(week => {
-			let processedData = processCenterData(week[1].centers, age)
-			if(processedData.indexOf("No") == 0 ) message += `Week of *${week[0]}* : ${processedData}`
-			else message += `Week of *${week[0]} : AVAILABLE *\n${processedData}`
-		})
-		message += "\n--------------------------------\n"
-	}
+	message += `*${district[1]}*\n`
+	let processedData = processCenterData(apiReponse.centers, district[2])
+	if(processedData.indexOf("No") == 0 ) message += `Week of *${week}* : ${processedData}`
+	else message += `Week of *${week} : AVAILABLE *\n${processedData}`
+	message += "\n--------------------------------\n"
 	return message
 }
 
-async function fetchData(_districts, _rawdata){
+async function fetchData(){
 	week = weekGenerator()
-	let writer = fs.createWriteStream(_rawdata);
-	await _districts.reduce(async (_previous, _currDistrict) => {
+	let writer = fs.createWriteStream(RAWDATA);
+	await monitoringList.reduce(async (_previous, currDistrict) => {
 		await _previous
-		let dataToWrite = { district: _currDistrict[1], week: [] }
+		let dataToWrite = { district: currDistrict, week: [] }
 		await week.reduce(async (_p, currentWeek) => {
 			await _p;
-			let response = await api(`${URLS.vaccinationCenters}?date=${currentWeek}&district_id=${_currDistrict[0]}`)
-			dataToWrite.week.push([currentWeek, response.data])
+			// fetch the data for the week
+			let response = await api(`${URLS.vaccinationCenters}?date=${currentWeek}&district_id=${currDistrict[0]}`)
+			let processedData = processData(response.data, currDistrict, currentWeek)
+			dataToWrite.week.push([currentWeek, processedData])
 		}, Promise.resolve())
-
 		writer.write(`${JSON.stringify(dataToWrite)}\n`)
-		console.log(`Fetched data for ${_currDistrict[1]}`)
+		console.log(`Fetched data for ${currDistrict[1]}`)
 	}, Promise.resolve())
 	writer.close()
 }
 
-async function init() {
+(async function () {
 	try {
-		await fetchData(kerala_districts, RAWDATA_KERALA)
-		await fetchData(karnataka_districts, RAWDATA_KA)
-		let message = await processData(RAWDATA_KERALA, 18)
-		await telegramAPI(message)
-		message = await processData(RAWDATA_KA, 18)
-		await cleanUpMessagesFromSlack()
-		await sendToSlack(message)
+		await fetchData()
+		// let message = await processData(RAWDATA_KERALA, 18)
+		// await telegramAPI(message)
+		// message = await processData(RAWDATA_KA, 18)
+		// await cleanUpMessagesFromSlack()
+		// await sendToSlack(message)
 	} catch(error){
 		console.log(error)
 	}
-}
-
-init()
+})()
