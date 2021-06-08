@@ -3,6 +3,8 @@ const path = require('path')
 const config = require('dotenv').config({ path: path.join(__dirname, 'config.env') })
 const { WebClient } = require('@slack/web-api');
 
+const monitoringList = require('./monitorList')
+
 const telegramToken = process.env.TELEGRAM_TOKEN
 const token = process.env.SLACK_BOT_TOKEN
 const conversationId = process.env.SLACK_CONVERSATION_ID
@@ -44,23 +46,23 @@ async function cleanUpMessagesFromSlack(){
 }
 
 module.exports = async channelData => {
-	// console.log(channelData)
-	let message = `${channelData.district} \n`
 
-	channelData.week.forEach(week => {
-		message += `Week starting ${week[0]}\n${week[1]}\n`
+	let listOfDistricts = {
+		slack: [],
+		telegram: []
+	}
+	monitoringList.forEach(district => {
+		if(district[3].indexOf('slack') != -1) listOfDistricts.slack.push(district[1])
+		if(district[3].indexOf('telegram') != -1) listOfDistricts.telegram.push(district[1])
 	})
 
-	let slackMessage = null
-	let telegramMessage = null
-
-	if (channelData.channels.indexOf("slack") > -1) slackMessage = "```" + message + "```"
-	if (channelData.channels.indexOf("telegram") > -1) telegramMessage = message
-
-	if(slackMessage) {
+	let messageHeader = `Data fetched at ${new Date().toLocaleString()}\n`
+	messageHeader += "===========================\n\n"
+	
+	if (channelData.slack.length > 0 ) {
 		await cleanUpMessagesFromSlack()
-		await sendToSlack(slackMessage)
+		await sendToSlack(`Vaccine availability for the districts - ${listOfDistricts.slack.join(", ")}\n` + messageHeader + channelData.slack.join("\n"))
 	}
 
-	if (telegramMessage) await telegramAPI(telegramMessage)
+	if (channelData.telegram.length > 0 ) await telegramAPI(`Vaccine availability for the districts - ${listOfDistricts.telegram.join(", ")}\n` + messageHeader + channelData.telegram.join("\n"))
 }

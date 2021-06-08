@@ -27,7 +27,8 @@ async function init() {
 			if(processedData.telegram) processedWeekData.telegram.push(processedData.telegram)
 		}
 	}
-	console.log(processedWeekData)
+	// console.log(processedWeekData)
+	channel(processedWeekData)
 }
 
 init()

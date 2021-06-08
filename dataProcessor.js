@@ -34,9 +34,9 @@ function formatMessage(availableCenters){
 		sortByKey(availableCenters[centerName], "min_age_limit")
 		availableCenters[centerName].forEach(session => {
 			sessionString += session.date
-			sessionString += " D1:" + padData(session.available_capacity_dose1.toString(), 3, "0")
-			sessionString += " D2:" + padData(session.available_capacity_dose2.toString(), 3, "0")
-			sessionString += " Age:" + session.min_age_limit
+			sessionString += `  ${padData(session.available_capacity_dose1.toString(), 3, "0")}/D1`
+			sessionString += ` ${padData(session.available_capacity_dose2.toString(), 3, "0")}/D2`
+			sessionString += `  ${session.min_age_limit}y`
 			sessionString += " " + session.vaccine.substr(0, 5)
 			sessionString += ` ${session.pincode} ${centerName}\n`
 		})
@@ -70,7 +70,7 @@ function processWeekData(ageLimit, weekData) {
 
 	let formattedMessage = formatMessage(availableCenters)
 
-	if (formattedMessage.length > 0) return [weekDate, formattedMessage]
+	if (formattedMessage.length > 0) return `Week starting *${weekDate}*\n${formattedMessage}\n`
 	return null
 }
 
@@ -80,9 +80,18 @@ module.exports = (districtData) => {
 	const ageLimit = districtData.district[2]
 	const channels = districtData.district[3]
 
-	console.log(district)
+	let messageHeader = `*${district}* _(Age group: ${ageLimit.join(", ")})_\n`
+	messageHeader += `----------------------------------------\n`
+	let messageBody = ''
 	districtData.week.forEach(week => {
 		let processedData = processWeekData(ageLimit, week)
-		console.log(processedData)
+		if(processedData) messageBody += processedData
 	})
+
+	if(messageBody != "") {
+		let outputMessage = {}
+		channels.forEach(channel => outputMessage[channel] = messageHeader + messageBody)
+		return outputMessage
+	}
+	return null
 }
