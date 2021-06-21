@@ -64,5 +64,18 @@ module.exports = async channelData => {
 		await sendToSlack(`Vaccine availability for the districts - ${listOfDistricts.slack.join(", ")}\n` + messageHeader + channelData.slack.join("\n"))
 	}
 
-	if (channelData.telegram.length > 0 ) await telegramAPI(`Vaccine availability for the districts - ${listOfDistricts.telegram.join(", ")}\n` + messageHeader + channelData.telegram.join("\n"))
+	if (channelData.telegram.length > 0 ) {
+		let data = `Vaccine availability for the districts - ${listOfDistricts.telegram.join(", ")}\n` + messageHeader + channelData.telegram.join("\n")
+		data = data.split("\n")
+		let output = ""
+		await data.reduce(async(_p, _c) => {
+			await _p
+			output += _c + "\n"
+			if(output.length > 3072) {
+				await telegramAPI(output)
+				output = ""
+			}
+			return output
+		}, "")
+	}
 }
